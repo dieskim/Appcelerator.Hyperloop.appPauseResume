@@ -5,7 +5,7 @@ Cross-platform Hyperloop Module for detecting if app paused or resumed on both t
 
 ## How to:
 
-1. Copy the `appPauseResume` folder to your `lib/` (Alloy) or your Resources (Classic) directory
+1. Copy the appPauseResume.js file to your `lib/` (Alloy) or your Resources (Classic) directory
 2. Copy the example code to your Titanium app
 3. Go for it!
 
@@ -13,7 +13,7 @@ Cross-platform Hyperloop Module for detecting if app paused or resumed on both t
 
 ```js
 // require appPauseResumeModule
-var appPauseResume = require('appPauseResume/appPauseResume');
+var appPauseResume = require('appPauseResume');
 
 // run appPauseResume and add resume and pause callbacks
 appPauseResume({pause: function(){
