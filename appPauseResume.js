@@ -4,13 +4,67 @@
  * - iOS uses core T.App EventListeners pause and resume
  * - Android uses Narive Java Classes via Hyperloop and a setInterval to check and detect - Credit for native code: https://github.com/benbahrenburg/benCoding.Android.Tools
  *
- * @example    <caption>Require and run an exported function to listen for pause and resume callbacks</caption> 
  * 
- * 	// require appPauseResumeModule
+ *
+ * @example    <caption>Require and run an exported function to listen for pause and resume callbacks</caption> 
+ * 	
+ * 	// IF YOU WOULD LIKE TO USE START ON IOS - Add the following to the top of you alloy.js
+ * 	//////////////////////////////////////////////////////////////////////////////
+	// 					START - STARTUP DETECTION FOR IOS						//
+	if(OS_IOS){
+
+		var TiApp = require('Titanium/TiApp');
+		var UIApplicationDelegate = require('UIKit').UIApplicationDelegate;
+		 
+		// Create a new class to handle the delegate
+		var TiAppApplicationDelegate = Hyperloop.defineClass('TiAppApplicationDelegate', 'NSObject', 'UIApplicationDelegate');
+		 
+		// Add the selector to handle the result
+		TiAppApplicationDelegate.addMethod({
+			selector: 'application:didFinishLaunchingWithOptions:',
+			instance: true,
+			returnType: 'BOOL',
+			arguments: [
+				'UIApplication',
+				'NSDictionary'
+			],
+			callback: function(application, options) {
+			if (this.didFinishLaunchingWithOptions) {
+				return this.didFinishLaunchingWithOptions(application, options);
+			}
+			return true;
+			}
+		});
+		 
+		// Instantiate the delegate subclass
+		var applicationDelegate = new TiAppApplicationDelegate();
+		 
+		// Called when the application finished launching. Initialize SDK's here for example
+		applicationDelegate.didFinishLaunchingWithOptions = function(application, options) {
+		 	
+		 	// fire app event start
+		 	Ti.App.fireEvent('start');
+
+			return true
+		};
+		 
+		// Finally, assign your subclass to the "applicationDelegate" property of the TiApp class
+		TiApp.app().registerApplicationDelegate(applicationDelegate);
+
+	};
+	// 					END - STARTUP DETECTION FOR IOS							//
+	//////////////////////////////////////////////////////////////////////////////
+
+ * 	// below that require the module and run code as follows
+ 	// require appPauseResumeModule
 	var appPauseResume = require('appPauseResume/appPauseResume');
 
 	// run appPauseResume and add resume and pause callbacks
-	appPauseResume({pause: function(){
+	appPauseResume({start: function(){
+
+						Ti.API.info("appPauseResume - start");
+
+					},pause: function(){
 
                     	Ti.API.info("appPauseResume - pause");
 
@@ -40,8 +94,26 @@ function appPauseResume(data){
 	// set setIntervalTime else default
 	var setIntervalTime = data.setIntervalTime || 1000; // Default: 1000 miliseconds (1 second)
 	
+	// set firstStart
+	var firstStart = true;
+
 	// START IF - iOS / Android
 	if(OS_IOS){
+
+		// START IF - has data.start 
+		if (data.start){
+			
+			// IF YOU WOULD LIKE TO USE START ON IOS - SEE README ABOVE FOR REQUIRMENT TO GET THIS TO WORK
+			// addEventListener start - Fired when the application is started
+			Ti.App.addEventListener('start', function(e){
+				
+				// run data start callback
+				data.start();
+				
+			});	
+
+		};      
+		// END IF - has data.start
 
 		// START IF - has data.pause 
 		if (data.pause){
@@ -81,6 +153,24 @@ function appPauseResume(data){
 		    
 		    // get isInForeground via isInForegroundCheck function
 		    var isInForeground = isInForegroundCheck();
+
+		    // START IF - check for firstStart
+		    if(firstStart && isInForeground){
+
+		    	// START IF - has data.start 
+				if (data.start){
+
+					// run data start callback
+					data.start();
+
+				};      
+				// END IF - has data.start
+				
+		    	// set firstStart
+		    	firstStart = false;
+
+		    };
+		    // END IF - check for firstStart
 
 		    // START IF - check for change wasInForeGround !== isInForeground
 	        if (wasInForeGround !== isInForeground) {

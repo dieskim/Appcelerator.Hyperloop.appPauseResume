@@ -12,11 +12,66 @@ Cross-platform Hyperloop Module for detecting if app paused or resumed on both t
 ## Example
 
 ```js
+
+// NOTE - IF YOU WOULD LIKE TO USE START ON IOS - Add the following to the top of you alloy.js
+//////////////////////////////////////////////////////////////////////////////
+// 					START - STARTUP DETECTION FOR IOS						//
+if(OS_IOS){
+
+	var TiApp = require('Titanium/TiApp');
+	var UIApplicationDelegate = require('UIKit').UIApplicationDelegate;
+		 
+	// Create a new class to handle the delegate
+	var TiAppApplicationDelegate = Hyperloop.defineClass('TiAppApplicationDelegate', 'NSObject', 'UIApplicationDelegate');
+		 
+	// Add the selector to handle the result
+	TiAppApplicationDelegate.addMethod({
+		selector: 'application:didFinishLaunchingWithOptions:',
+		instance: true,
+		returnType: 'BOOL',
+		arguments: [
+			'UIApplication',
+			'NSDictionary'
+		],
+		callback: function(application, options) {
+		if (this.didFinishLaunchingWithOptions) {
+			return this.didFinishLaunchingWithOptions(application, options);
+		}
+		return true;
+		}
+	});
+		 
+	// Instantiate the delegate subclass
+	var applicationDelegate = new TiAppApplicationDelegate();
+		 
+	// Called when the application finished launching. Initialize SDK's here for example
+	applicationDelegate.didFinishLaunchingWithOptions = function(application, options) {
+		 	
+		 // fire app event start
+		 Ti.App.fireEvent('start');
+
+		return true
+	};
+		 
+	// Finally, assign your subclass to the "applicationDelegate" property of the TiApp class
+	TiApp.app().registerApplicationDelegate(applicationDelegate);
+
+};
+// 					END - STARTUP DETECTION FOR IOS							//
+//////////////////////////////////////////////////////////////////////////////
+
+// below that require the module and run code as follows
+
 // require appPauseResumeModule
 var appPauseResume = require('appPauseResume');
 
 // run appPauseResume and add resume and pause callbacks
-appPauseResume({pause: function(){
+appPauseResume({start: function(){
+
+						Ti.API.info("appPauseResume - start");
+
+				},
+				pause: function(){
 
                     Ti.API.info("appPauseResume - pause");
 
