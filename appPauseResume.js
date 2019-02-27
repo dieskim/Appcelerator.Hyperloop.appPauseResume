@@ -145,6 +145,24 @@ function appPauseResume(data){
 
 	}else{ // OS_ANDROID
 
+		// START IF - check for firstStart
+		if(firstStart){
+
+		    // START IF - has data.start 
+			if (data.start){
+
+				// run data start callback
+				data.start();
+
+			};      
+			// END IF - has data.start
+				
+		    // set firstStart
+			firstStart = false;
+
+		};
+		// END IF - check for firstStart
+
 		// set wasInForeGround true
 		var wasInForeGround = true;
 
@@ -153,24 +171,6 @@ function appPauseResume(data){
 		    
 		    // get isInForeground via isInForegroundCheck function
 		    var isInForeground = isInForegroundCheck();
-
-		    // START IF - check for firstStart
-		    if(firstStart && isInForeground){
-
-		    	// START IF - has data.start 
-				if (data.start){
-
-					// run data start callback
-					data.start();
-
-				};      
-				// END IF - has data.start
-				
-		    	// set firstStart
-		    	firstStart = false;
-
-		    };
-		    // END IF - check for firstStart
 
 		    // START IF - check for change wasInForeGround !== isInForeground
 	        if (wasInForeGround !== isInForeground) {
